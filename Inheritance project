@@ -1,0 +1,35 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.7;
+
+contract Will{
+    address public owner;
+    address public recipient;
+    uint256 public unlockTime ;
+
+    constructor(address _recipients){
+        owner = msg.sender ;
+        recipient = _recipients;
+    }
+    receive() external payable { }
+    fallback() external payable {}
+    modifier onlyOwner(){
+        require(msg.sender == owner);
+        _;
+    }
+
+    function changeRecipients(address _changeRecipient) public onlyOwner{
+        recipient = _changeRecipient;
+    }
+
+    function ping() public onlyOwner {
+        unlockTime = block.timestamp + 31536000;
+    }
+
+    function withdraw() external payable  {
+        require(msg.sender == recipient);
+        require(block.timestamp > unlockTime);
+        payable(owner).transfer(address(this).balance);
+    }
+    
+
+}
